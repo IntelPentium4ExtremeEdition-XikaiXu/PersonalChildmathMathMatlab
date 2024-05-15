@@ -1,46 +1,57 @@
 %xikai xu 400440917 
 
-% Define the differential equation
-f = @(x, y) x - y;
+% Define the differential equation and exact solution
+f = @(x, y) 9 * x + y;
+exact_solution = @(x) 29 * exp(x) - 9 * x - 9;
 
-% Define the exact solution function
-exact_solution = @(x) 2 * exp(-x) + x - 1;
+% Define the step sizes
+h_values = [0.4, 0.2, 0.1];
 
-% Define Euler's method
-euler_method = @(f, x0, y0, h, n) deal(x0 + (0:n) * h, y0 + cumsum(h * f(x0 + (0:n) * h, y0)));
+% Define the range of x-values
+x_range = [0, 2];
 
-% Initial condition
+% Define initial conditions
 x0 = 0;
-y0 = 1;
+y0 = 20;
 
-% Step sizes
-hs = [0.4, 0.2, 0.1];
-
-% Number of steps
-n_values = round(2 ./ hs);
-
-% Plot
+% Create a figure
 figure;
 hold on;
-
-% Plot exact solution
-x_exact = linspace(0, 2, 100);
-y_exact = exact_solution(x_exact);
-plot(x_exact, y_exact, 'b', 'LineWidth', 2, 'DisplayName', 'Exact Solution');
-
-% Plot Euler's method approximations
-colors = {'r', 'g', 'm'};
-for i = 1:length(hs)
-    h = hs(i);
-    n = n_values(i);
-    [x_values, y_values] = euler_method(f, x0, y0, h, n);
-    plot(x_values, y_values, 'Color', colors{i}, 'LineWidth', 2, 'DisplayName', ['Euler h=' num2str(h)]);
-end
-
-xlabel('x');
-ylabel('y');
-title('Euler''s Method Approximations vs Exact Solution');
-legend('Location', 'best');
 grid on;
 
+% Colors for different step sizes
+colors = {'r', 'g', 'b'};
+legend_entries = {};
+
+% Iterate over the different step sizes
+for i = 1:length(h_values)
+    h = h_values(i);
+    x_values = x0:h:x_range(2);
+    y_values = zeros(1, length(x_values));
+    y_values(1) = y0;
+    
+    % Apply Euler's method
+    for j = 1:length(x_values)-1
+        y_values(j+1) = y_values(j) + h * f(x_values(j), y_values(j));
+    end
+    
+    % Plot the Euler's method approximation
+    plot(x_values, y_values, 'Color', colors{i}, 'LineWidth', 2);
+    legend_entries{end+1} = ['Euler''s method, h = ', num2str(h)];
+end
+
+% Plot the exact solution
+x_exact = linspace(x_range(1), x_range(2), 1000);
+y_exact = exact_solution(x_exact);
+plot(x_exact, y_exact, 'k', 'LineWidth', 2);
+legend_entries{end+1} = 'Exact solution';
+
+% Add labels and legend
+xlabel('x');
+ylabel('y');
+title('Euler''s Method Approximations vs. Exact Solution');
+legend(legend_entries, 'Location', 'NorthWest');
+
 hold off;
+
+
